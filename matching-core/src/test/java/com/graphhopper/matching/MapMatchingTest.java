@@ -236,15 +236,19 @@ public class MapMatchingTest {
     List<String> fetchStreets(List<EdgeMatch> emList) {
         List<String> list = new ArrayList<String>();
         int prevNode = -1;
+        int prevEdge=-1;
         List<String> errors = new ArrayList<String>();
         for (EdgeMatch em : emList) {
             String str = em.getEdgeState().getName();// + ":" + em.getEdgeState().getBaseNode() + "->" + em.getEdgeState().getAdjNode();
             list.add(str);
             if (prevNode >= 0) {
                 if (em.getEdgeState().getBaseNode() != prevNode) {
-                    errors.add(str);
+                	if (em.getEdgeState().getEdge() != prevEdge) {
+                		errors.add(str);
+                	}
                 }
             }
+            prevEdge=em.getEdgeState().getEdge();
             prevNode = em.getEdgeState().getAdjNode();
         }
 

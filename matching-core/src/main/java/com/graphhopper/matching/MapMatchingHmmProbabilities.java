@@ -98,14 +98,14 @@ class MapMatchingHmmProbabilities<S, O> implements HmmProbabilities<S, O> {
         
         final double linearDistance = spatialMetrics.linearDistance(sourceMeasurement,
                 targetMeasurement);
-        final Double routeLength = spatialMetrics.routeLength(sourcePosition, targetPosition);
-        if (routeLength == null) {
+        Double routeDuration = spatialMetrics.routeDuration(sourcePosition, targetPosition);
+        if (routeDuration == null) {
             return null;
         } else if (timeDiff == 0) {
             // avoid Infinity if identical snapped positions, assume 0 length difference
             return 0.0;
         } else {
-            return Math.abs(linearDistance - routeLength) / (timeDiff * timeDiff);
+            return routeDuration / (timeDiff * timeDiff);
         }
     }
 

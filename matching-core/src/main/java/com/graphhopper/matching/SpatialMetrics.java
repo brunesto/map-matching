@@ -42,8 +42,8 @@ interface SpatialMetrics<S, O> {
     public double linearDistance(O formerMeasurement, O laterMeasurement);
 
     /**
-     * Returns the length [m] of the shortest route between both specified road positions or
+     * Returns the duration in seconds of  fastest route between both specified road positions or
      * null if no route exists between the specified road positions.
      */
-    public Double routeLength(S sourcePosition, S targetPosition);
+    public Double routeDuration(S sourcePosition, S targetPosition);
 }

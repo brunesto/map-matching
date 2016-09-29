@@ -17,8 +17,7 @@
  */
 package com.graphhopper.matching;
 
-import com.graphhopper.routing.weighting.FastestWeighting;
-import com.graphhopper.routing.weighting.Weighting;
+
 import com.graphhopper.routing.DijkstraBidirectionRef;
 import com.graphhopper.routing.Path;
 import com.graphhopper.routing.QueryGraph;
@@ -36,6 +35,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.log4j.Logger;
 
 /**
  * This class matches real world GPX entries to the digital road network stored
@@ -141,8 +142,11 @@ public class MapMatching {
         GPXEntry previous = null;
         int indexGPX = 0;
         for (GPXEntry entry : gpxList) {
+        
+        	
             if (previous == null
-                    || distanceCalc.calcDist(previous.getLat(), previous.getLon(), entry.getLat(), entry.getLon()) > 2 * measurementErrorSigma
+            		|| true
+//                    ||distanceCalc.calcDist(previous.getLat(), previous.getLon(), entry.getLat(), entry.getLon()) >0//2 * measurementErrorSigma 
                     // always include last point
                     || indexGPX == gpxList.size() - 1) {
                 List<QueryResult> candidates = locationIndex.findNClosest(entry.lat, entry.lon, edgeFilter, measurementErrorSigma);
@@ -158,6 +162,7 @@ public class MapMatching {
             }
             indexGPX++;
         }
+       
         if (allCandidates.size() < 2) {
             throw new IllegalArgumentException("To few matching coordinates (" + allCandidates.size() + "). Wrong region imported?");
         }
@@ -190,7 +195,7 @@ public class MapMatching {
             }
 
             @Override
-            public Double routeLength(GPXExtension sourcePosition, GPXExtension targetPosition) {
+            public Double routeDuration(GPXExtension sourcePosition, GPXExtension targetPosition) {
                 // TODO allow CH, then optionally use cached one-to-many Dijkstra to improve speed
                 DijkstraBidirectionRef algo = new DijkstraBidirectionRef(queryGraph, encoder, weighting, traversalMode);
                 algo.setMaxVisitedNodes(maxVisitedNodes);
@@ -201,7 +206,7 @@ public class MapMatching {
                 if (!path.isFound()) {
                     return null;
                 }
-                return path.getDistance();
+                return (double)path.getTime();
             }
         };
         // printMinDistances(timeSteps);
@@ -231,18 +236,21 @@ public class MapMatching {
                 distance += path.getDistance();
                 time += path.getTime();
                 for (EdgeIteratorState edgeIteratorState : path.calcEdges()) {
+                	
+                	
                     EdgeIteratorState directedRealEdge = resolveToRealEdge(virtualEdgesMap, edgeIteratorState);
                     if (directedRealEdge == null) {
                         throw new RuntimeException("Did not find real edge for " + edgeIteratorState.getEdge());
                     }
-                    if (currentEdge == null || !equalEdges(directedRealEdge, currentEdge)) {
+                    // commented as it causes loss of info
+//                    if (currentEdge == null || !equalEdges(directedRealEdge, currentEdge)) {
                         if (currentEdge != null) {
                             EdgeMatch edgeMatch = new EdgeMatch(currentEdge, gpxExtensions);
                             edgeMatches.add(edgeMatch);
                             gpxExtensions = new ArrayList<GPXExtension>();
                         }
                         currentEdge = directedRealEdge;
-                    }
+//                    }
                 }
                 gpxExtensions.add(nextQueryResult);
                 queryResult = nextQueryResult;
